@@ -98,4 +98,70 @@ pub enum Command {
         #[arg(long, value_name = "FORMAT", default_value = "text")]
         format: String,
     },
+
+    /// Show a monthly calendar with fire days highlighted.
+    Calendar {
+        /// The cron expression.
+        expression: String,
+
+        /// Year for the calendar (default: current year).
+        #[arg(short, long)]
+        year: Option<i32>,
+
+        /// Month (1-12). If not specified, uses current month.
+        #[arg(short, long)]
+        month: Option<u32>,
+
+        /// Number of months to show.
+        #[arg(long, default_value = "1")]
+        months: usize,
+
+        /// Timezone (IANA name).
+        #[arg(short, long, default_value = "UTC")]
+        timezone: String,
+
+        /// Output format: text or json.
+        #[arg(long, value_name = "FORMAT", default_value = "text")]
+        format: String,
+    },
+
+    /// Show a 24-hour timeline of fire times by day of week.
+    Week {
+        /// The cron expression.
+        expression: String,
+
+        /// Year for the week view (default: current year).
+        #[arg(short, long)]
+        year: Option<i32>,
+
+        /// Month (1-12). If not specified, uses current month.
+        #[arg(short, long)]
+        month: Option<u32>,
+
+        /// Timezone (IANA name).
+        #[arg(short, long, default_value = "UTC")]
+        timezone: String,
+
+        /// Output format: text or json.
+        #[arg(long, value_name = "FORMAT", default_value = "text")]
+        format: String,
+    },
+
+    /// Show a year overview of fire days across all 12 months.
+    Year {
+        /// The cron expression.
+        expression: String,
+
+        /// Year for the overview (default: current year).
+        #[arg(short, long)]
+        year: Option<i32>,
+
+        /// Timezone (IANA name).
+        #[arg(short, long, default_value = "UTC")]
+        timezone: String,
+
+        /// Output format: text or json.
+        #[arg(long, value_name = "FORMAT", default_value = "text")]
+        format: String,
+    },
 }

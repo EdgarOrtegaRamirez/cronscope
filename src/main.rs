@@ -4,10 +4,16 @@ use std::io::{self, Read};
 use std::process::ExitCode;
 
 use anyhow::{anyhow, Result};
+use chrono::Datelike;
 use chrono::Utc;
 use clap::Parser;
 
 use cronscope::cli::{Cli, Command};
+use cronscope::calendar::{
+    build_month_calendar, build_week_view, build_year_overview, format_month_calendar,
+    format_month_calendar_json, format_week_view, format_week_view_json, format_year_overview,
+    format_year_overview_json,
+};
 use cronscope::evaluator::{next_runs, prev_run};
 use cronscope::explain::explain;
 use cronscope::expr::parse_cron;
@@ -141,6 +147,85 @@ fn run() -> Result<ExitCode> {
             let out = match fmt {
                 OutputFormat::Text => format_overlaps_text(&overlaps),
                 OutputFormat::Json => format_overlaps_json(&overlaps),
+            };
+            print!("{out}");
+            Ok(ExitCode::SUCCESS)
+        }
+
+        Command::Calendar {
+            expression,
+            year,
+            month,
+            months,
+            timezone,
+            format,
+        } => {
+            let expr = parse_cron(&expression).map_err(|e| anyhow!(e))?;
+            let tz = parse_timezone(&timezone)?;
+            let now = Utc::now().with_timezone(&tz);
+            let cal_year = year.unwrap_or(now.year());
+            let cal_month = month.unwrap_or(now.month());
+            let fmt = parse_format(&format)?;
+
+            let mut output = String::new();
+            for i in 0..months {
+                let m = u32::try_from((cal_month as usize - 1 + i) % 12 + 1).unwrap_or(1);
+                let y = cal_year + ((cal_month as usize - 1 + i) / 12) as i32;
+                let cal = build_month_calendar(&expr, &tz, y, m);
+                let out = match fmt {
+                    OutputFormat::Text => format_month_calendar(&cal, &expression),
+                    OutputFormat::Json => format_month_calendar_json(&cal, &expression),
+                };
+                output.push_str(&out);
+                if fmt == OutputFormat::Text && i < months - 1 {
+                    output.push('\n');
+                }
+            }
+            print!("{output}");
+            Ok(ExitCode::SUCCESS)
+        }
+
+        Command::Week {
+            expression,
+            year,
+            month,
+            timezone,
+            format,
+        } => {
+            let expr = parse_cron(&expression).map_err(|e| anyhow!(e))?;
+            let tz = parse_timezone(&timezone)?;
+            let now = Utc::now().with_timezone(&tz);
+            let w_year = year.unwrap_or(now.year());
+            let w_month = month.unwrap_or(now.month());
+            let fmt = parse_format(&format)?;
+
+            let entries = build_week_view(&expr, &tz, w_year, w_month);
+            let out = match fmt {
+                OutputFormat::Text => format_week_view(&entries, &expression, w_year, w_month),
+                OutputFormat::Json => {
+                    format_week_view_json(&entries, &expression, w_year, w_month)
+                }
+            };
+            print!("{out}");
+            Ok(ExitCode::SUCCESS)
+        }
+
+        Command::Year {
+            expression,
+            year,
+            timezone,
+            format,
+        } => {
+            let expr = parse_cron(&expression).map_err(|e| anyhow!(e))?;
+            let tz = parse_timezone(&timezone)?;
+            let now = Utc::now().with_timezone(&tz);
+            let y_year = year.unwrap_or(now.year());
+            let fmt = parse_format(&format)?;
+
+            let overview = build_year_overview(&expr, &tz, y_year);
+            let out = match fmt {
+                OutputFormat::Text => format_year_overview(&overview, &expression),
+                OutputFormat::Json => format_year_overview_json(&overview, &expression),
             };
             print!("{out}");
             Ok(ExitCode::SUCCESS)

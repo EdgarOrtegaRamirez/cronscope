@@ -5,6 +5,7 @@
 //! (Quartz, with year) cron syntax, including special modifiers `L`, `W`,
 //! `#`, `?`, named months/days, and step values.
 
+pub mod calendar;
 pub mod cli;
 pub mod evaluator;
 pub mod explain;

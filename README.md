@@ -20,8 +20,9 @@ A comprehensive cron expression toolkit CLI — parse, validate, explain, comput
 - **Human-readable explanations**: "At 02:30 on Monday through Friday"
 - **Semantic validation**: detects impossible day/month combinations, degenerate steps, past years
 - **Schedule overlap detection**: find time windows where multiple cron jobs fire simultaneously
-- **Multiple output formats**: text (default) and JSON (for CI/automation)
 - **CI-friendly exit codes**: `--strict` flag for validation
+- **Calendar views**: monthly calendar with highlighted fire days, week view with 24-hour timeline, and full year overview
+- **Multiple output formats**: text (default) and JSON (for CI/automation)
 
 ## Installation
 
@@ -153,6 +154,66 @@ $ cronscope next "*/15 * * * *" -c 3 --format json
 ]
 ```
 
+### Monthly calendar view
+
+Show which days in a month a cron expression fires on, with fire days highlighted:
+
+```bash
+$ cronscope calendar "0 12 * * *" --year 2026 --month 7
+July 2026
+Expression: 0 12 * * *
+Total fires: 31
+
+Su Mo Tu We Th Fr Sa
+          1  2  3  4
+ 5  6  7  8  9 10 11
+12 13 14 15 16 17 18
+19 20 21 22 23 24 25
+26 27 28 29 30 31
+
+█  = fire day
+```
+
+Show multiple months with `--months`:
+
+```bash
+$ cronscope calendar "0 0 * * 0" --year 2026 --month 7 --months 2
+```
+
+### Week view
+
+Show fire times grouped by day of the week:
+
+```bash
+$ cronscope week "0 9,12,17 * * 1-5" --year 2026 --month 7
+Week View — July 2026
+Expression: 0 9,12,17 * * 1-5
+
+Sun  —
+Mon  09:00:00, 12:00:00, 17:00:00
+Tue  09:00:00, 12:00:00, 17:00:00
+Wed  09:00:00, 12:00:00, 17:00:00
+Thu  09:00:00, 12:00:00, 17:00:00
+Fri  09:00:00, 12:00:00, 17:00:00
+Sat  —
+```
+
+### Year overview
+
+Show fire days across all 12 months in a compact format:
+
+```bash
+$ cronscope year "0 0 1 * *" --year 2026
+Year Overview — 2026
+Expression: 0 0 1 * *
+Total fires: 12
+
+Jan 2026: ...............................  1 days, 3% busy
+Feb 2026: ............................  1 days, 4% busy
+Mar 2026: ...............................  1 days, 3% busy
+...
+```
+
 ## Cron Syntax Reference
 
 ### Field order
@@ -191,6 +252,7 @@ src/
 ├── main.rs       — CLI entry point, command dispatch
 ├── cli.rs        — clap argument definitions
 ├── lib.rs        — library re-exports
+├── calendar.rs   — calendar, week, and year overview visualization
 ├── field.rs      — individual field parsing (minute, hour, DOM, etc.)
 ├── expr.rs       — full cron expression parsing
 ├── evaluator.rs  — next/previous run time computation
@@ -205,7 +267,7 @@ The evaluator uses a **field-by-field advancement algorithm**: starting from a r
 ## Testing
 
 ```bash
-cargo test          # 80 tests
+cargo test          # 90 tests
 cargo clippy        # lint
 cargo fmt --check   # format check
 ```
