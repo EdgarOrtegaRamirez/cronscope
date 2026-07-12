@@ -63,12 +63,7 @@ pub struct YearOverview {
 }
 
 /// Build a calendar for a single month.
-pub fn build_month_calendar(
-    expr: &CronExpr,
-    tz: &Tz,
-    year: i32,
-    month: u32,
-) -> MonthCalendar {
+pub fn build_month_calendar(expr: &CronExpr, tz: &Tz, year: i32, month: u32) -> MonthCalendar {
     let days_in_month_count = days_in_month(year, month);
     let first_of_month = NaiveDate::from_ymd_opt(year, month, 1)
         .unwrap_or_else(|| panic!("invalid date {year}-{month}-1"));
@@ -163,22 +158,52 @@ pub fn build_month_calendar(
 }
 
 /// Build a week view showing fire times by day of week.
-pub fn build_week_view(
-    expr: &CronExpr,
-    tz: &Tz,
-    year: i32,
-    month: u32,
-) -> Vec<WeekDayEntry> {
+pub fn build_week_view(expr: &CronExpr, tz: &Tz, year: i32, month: u32) -> Vec<WeekDayEntry> {
     let cal = build_month_calendar(expr, tz, year, month);
 
     let mut week_entries = vec![
-        WeekDayEntry { weekday: 0, weekday_name: "Sun", fire_times: Vec::new(), total_fires: 0 },
-        WeekDayEntry { weekday: 1, weekday_name: "Mon", fire_times: Vec::new(), total_fires: 0 },
-        WeekDayEntry { weekday: 2, weekday_name: "Tue", fire_times: Vec::new(), total_fires: 0 },
-        WeekDayEntry { weekday: 3, weekday_name: "Wed", fire_times: Vec::new(), total_fires: 0 },
-        WeekDayEntry { weekday: 4, weekday_name: "Thu", fire_times: Vec::new(), total_fires: 0 },
-        WeekDayEntry { weekday: 5, weekday_name: "Fri", fire_times: Vec::new(), total_fires: 0 },
-        WeekDayEntry { weekday: 6, weekday_name: "Sat", fire_times: Vec::new(), total_fires: 0 },
+        WeekDayEntry {
+            weekday: 0,
+            weekday_name: "Sun",
+            fire_times: Vec::new(),
+            total_fires: 0,
+        },
+        WeekDayEntry {
+            weekday: 1,
+            weekday_name: "Mon",
+            fire_times: Vec::new(),
+            total_fires: 0,
+        },
+        WeekDayEntry {
+            weekday: 2,
+            weekday_name: "Tue",
+            fire_times: Vec::new(),
+            total_fires: 0,
+        },
+        WeekDayEntry {
+            weekday: 3,
+            weekday_name: "Wed",
+            fire_times: Vec::new(),
+            total_fires: 0,
+        },
+        WeekDayEntry {
+            weekday: 4,
+            weekday_name: "Thu",
+            fire_times: Vec::new(),
+            total_fires: 0,
+        },
+        WeekDayEntry {
+            weekday: 5,
+            weekday_name: "Fri",
+            fire_times: Vec::new(),
+            total_fires: 0,
+        },
+        WeekDayEntry {
+            weekday: 6,
+            weekday_name: "Sat",
+            fire_times: Vec::new(),
+            total_fires: 0,
+        },
     ];
 
     // For each fire day, determine the weekday and collect unique fire times.
@@ -205,11 +230,7 @@ pub fn build_week_view(
 }
 
 /// Build a year overview.
-pub fn build_year_overview(
-    expr: &CronExpr,
-    tz: &Tz,
-    year: i32,
-) -> YearOverview {
+pub fn build_year_overview(expr: &CronExpr, tz: &Tz, year: i32) -> YearOverview {
     let months: Vec<MonthCalendar> = (1..=12)
         .map(|m| build_month_calendar(expr, tz, year, m))
         .collect();
@@ -226,17 +247,23 @@ pub fn build_year_overview(
 /// Format a month calendar as a text string.
 pub fn format_month_calendar(cal: &MonthCalendar, expr_raw: &str) -> String {
     let month_names = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December",
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
     ];
     let month_name = month_names[cal.month as usize - 1];
 
     let mut out = String::new();
-    out.push_str(&format!(
-        "{} {}\n",
-        month_name,
-        cal.year
-    ));
+    out.push_str(&format!("{} {}\n", month_name, cal.year));
     out.push_str(&format!("Expression: {}\n", expr_raw));
     out.push_str(&format!("Total fires: {}\n\n", cal.total_fires));
 
@@ -318,8 +345,18 @@ pub fn format_month_calendar_json(cal: &MonthCalendar, expr_raw: &str) -> String
     }
 
     let month_names = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December",
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
     ];
 
     let json = CalendarJson {
@@ -346,16 +383,23 @@ pub fn format_month_calendar_json(cal: &MonthCalendar, expr_raw: &str) -> String
 /// Format a week view as text.
 pub fn format_week_view(entries: &[WeekDayEntry], expr_raw: &str, year: i32, month: u32) -> String {
     let month_names = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December",
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
     ];
     let month_name = month_names[month as usize - 1];
 
     let mut out = String::new();
-    out.push_str(&format!(
-        "Week View — {} {}\n",
-        month_name, year
-    ));
+    out.push_str(&format!("Week View — {} {}\n", month_name, year));
     out.push_str(&format!("Expression: {}\n\n", expr_raw));
 
     for entry in entries {
@@ -363,11 +407,7 @@ pub fn format_week_view(entries: &[WeekDayEntry], expr_raw: &str, year: i32, mon
         if entry.fire_times.is_empty() {
             out.push_str(&format!("{}  —\n", day_label));
         } else {
-            out.push_str(&format!(
-                "{}  {}\n",
-                day_label,
-                entry.fire_times.join(", ")
-            ));
+            out.push_str(&format!("{}  {}\n", day_label, entry.fire_times.join(", ")));
         }
     }
 
@@ -418,15 +458,11 @@ pub fn format_week_view_json(
 /// Format a year overview as text.
 pub fn format_year_overview(overview: &YearOverview, expr_raw: &str) -> String {
     let month_abbr = [
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
     ];
 
     let mut out = String::new();
-    out.push_str(&format!(
-        "Year Overview — {}\n",
-        overview.year
-    ));
+    out.push_str(&format!("Year Overview — {}\n", overview.year));
     out.push_str(&format!("Expression: {}\n", expr_raw));
     out.push_str(&format!("Total fires: {}\n\n", overview.total_fires));
 
@@ -439,7 +475,11 @@ pub fn format_year_overview(overview: &YearOverview, expr_raw: &str) -> String {
             0
         };
 
-        out.push_str(&format!("{} {:>2}: ", month_abbr[cal.month as usize - 1], cal.year));
+        out.push_str(&format!(
+            "{} {:>2}: ",
+            month_abbr[cal.month as usize - 1],
+            cal.year
+        ));
 
         let fire_day_nums: std::collections::HashSet<u32> =
             cal.fire_days.iter().map(|fd| fd.day).collect();
@@ -452,10 +492,7 @@ pub fn format_year_overview(overview: &YearOverview, expr_raw: &str) -> String {
             }
         }
 
-        out.push_str(&format!(
-            "  {} days, {}% busy\n",
-            fire_count, fire_pct
-        ));
+        out.push_str(&format!("  {} days, {}% busy\n", fire_count, fire_pct));
     }
 
     out
@@ -482,8 +519,18 @@ pub fn format_year_overview_json(overview: &YearOverview, expr_raw: &str) -> Str
     }
 
     let month_names = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December",
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
     ];
 
     let json = YearOverviewJson {
@@ -495,20 +542,20 @@ pub fn format_year_overview_json(overview: &YearOverview, expr_raw: &str) -> Str
             .iter()
             .map(|cal| {
                 let fire_day_nums: Vec<u32> = cal.fire_days.iter().map(|fd| fd.day).collect();
-            let busy_pct = if cal.days_in_month > 0 {
-                fire_day_nums.len() as f64 / cal.days_in_month as f64 * 100.0
-            } else {
-                0.0
-            };
-            let fire_count = fire_day_nums.len();
-            MonthSummaryJson {
-                month: cal.month,
-                month_name: month_names[cal.month as usize - 1].to_string(),
-                days_in_month: cal.days_in_month,
-                fire_days: fire_day_nums,
-                fire_count,
-                busy_pct,
-            }
+                let busy_pct = if cal.days_in_month > 0 {
+                    fire_day_nums.len() as f64 / cal.days_in_month as f64 * 100.0
+                } else {
+                    0.0
+                };
+                let fire_count = fire_day_nums.len();
+                MonthSummaryJson {
+                    month: cal.month,
+                    month_name: month_names[cal.month as usize - 1].to_string(),
+                    days_in_month: cal.days_in_month,
+                    fire_days: fire_day_nums,
+                    fire_count,
+                    busy_pct,
+                }
             })
             .collect(),
     };

@@ -8,12 +8,12 @@ use chrono::Datelike;
 use chrono::Utc;
 use clap::Parser;
 
-use cronscope::cli::{Cli, Command};
 use cronscope::calendar::{
     build_month_calendar, build_week_view, build_year_overview, format_month_calendar,
     format_month_calendar_json, format_week_view, format_week_view_json, format_year_overview,
     format_year_overview_json,
 };
+use cronscope::cli::{Cli, Command};
 use cronscope::evaluator::{next_runs, prev_run};
 use cronscope::explain::explain;
 use cronscope::expr::parse_cron;
@@ -202,9 +202,7 @@ fn run() -> Result<ExitCode> {
             let entries = build_week_view(&expr, &tz, w_year, w_month);
             let out = match fmt {
                 OutputFormat::Text => format_week_view(&entries, &expression, w_year, w_month),
-                OutputFormat::Json => {
-                    format_week_view_json(&entries, &expression, w_year, w_month)
-                }
+                OutputFormat::Json => format_week_view_json(&entries, &expression, w_year, w_month),
             };
             print!("{out}");
             Ok(ExitCode::SUCCESS)
